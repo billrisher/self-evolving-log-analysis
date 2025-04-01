@@ -32,14 +32,6 @@ pub async fn analyze_queue(
         stats.calculated.info_pct = stats.raw.info_count as f64 / stats.raw.total_count as f64;
         stats.calculated.debug_pct = stats.raw.debug_count as f64 / stats.raw.total_count as f64;
 
-        // TODO: Fix
-        stats.calculated.avg_entries_per_second =
-            (stats.raw.total_count as f64 / 60.0).round() as usize;
-        // TODO: Fix
-        stats.calculated.peak_entries_per_second = stats.raw.total_count;
-        // TODO: Fix
-        stats.calculated.entries_last_second = stats.raw.total_count;
-
         // Clear the queue
         queue.clear();
     }

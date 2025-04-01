@@ -23,6 +23,9 @@ This project is a primitive log analysis tool that parses logs, runs analysis on
 
 It is designed to be robust, handling large bursts of logs with ease.
 
+It does NOT yet have the ability to dynamically adjust the analysis window, adjust the queue buffer, or adjust the
+analysis.
+
 ### Known Limitations
 
 As it stands, the tool is not capable of handling much more throughput than about 1,000 logs per second.

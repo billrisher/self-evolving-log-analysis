@@ -25,17 +25,6 @@ pub async fn print_stats(stats: Arc<Mutex<Stats>>) -> io::Result<()> {
             "- Total Entries: {}",
             stats.raw.total_count.to_formatted_string(&Locale::en)
         );
-        println!(
-            "- Current Rate: {} entries/sec (Peak: {} entries/sec)",
-            stats
-                .calculated
-                .avg_entries_per_second
-                .to_formatted_string(&Locale::en),
-            stats
-                .calculated
-                .peak_entries_per_second
-                .to_formatted_string(&Locale::en)
-        );
         println!();
         println!("Pattern Analysis:");
         println!(

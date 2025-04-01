@@ -24,7 +24,11 @@ async fn main() -> io::Result<()> {
     let queue_clone = queue.clone();
     let handle = tokio::spawn(async move {
         if let Err(e) = process_stdin(debug_flag, queue_clone.clone()).await {
-            eprintln!("Error processing stdin: {}", e);
+            if debug_flag {
+                eprintln!("Error processing stdin: {}", e);
+            } else {
+                eprintln!("Error processing stdin");
+            }
         }
     });
 
@@ -32,7 +36,11 @@ async fn main() -> io::Result<()> {
     let stats_clone = stats.clone();
     let stats_handle = tokio::spawn(async move {
         if let Err(e) = print_stats(stats_clone.clone()).await {
-            eprintln!("Error printing stats: {}", e);
+            if debug_flag {
+                eprintln!("Error printing stats: {}", e);
+            } else {
+                eprintln!("Error printing stats");
+            }
         }
     });
 
@@ -41,7 +49,11 @@ async fn main() -> io::Result<()> {
     let stats_clone = stats.clone();
     let analyze_handle = tokio::spawn(async move {
         if let Err(e) = analyze_queue(analyze_clone.clone(), stats_clone.clone()).await {
-            eprintln!("Error analyzing queue: {}", e);
+            if debug_flag {
+                eprintln!("Error analyzing queue: {}", e);
+            } else {
+                eprintln!("Error analyzing queue");
+            }
         }
     });
 

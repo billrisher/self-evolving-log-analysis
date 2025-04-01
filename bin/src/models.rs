@@ -26,10 +26,4 @@ pub struct CalculatedStats {
     pub info_pct: f64,
     /// Percentage of DEBUG log entries
     pub debug_pct: f64,
-    /// Average number of log entries processed per second
-    pub avg_entries_per_second: usize,
-    /// Peak number of log entries processed per second
-    pub peak_entries_per_second: usize,
-    /// Number of log entries processed in the last second
-    pub entries_last_second: usize,
 }
