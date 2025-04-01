@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::str::FromStr;
 use thiserror::Error;
 
 // Lazily declare the REGEX pattern we're expecting log to fit
@@ -12,12 +13,13 @@ lazy_static! {
 
 #[derive(Error, Debug)]
 pub enum ParsingError {
+    /// Thrown during regex parsing, both when the regex fails to match and when it fails to parse
     #[error("Failed to parse log entry")]
     ParseError(&'static str),
+    /// Thrown when the timestamp fails to parse
     #[error("Failed to parse timestamp")]
     TimestampError(#[from] chrono::ParseError),
-    #[error("Failed to parse log level")]
-    LogLevelError(#[from] std::str::Utf8Error),
+    /// Thrown when an unknown log level is encountered
     #[error("Unknown log level")]
     UnknownLogLevel,
 }
@@ -29,8 +31,10 @@ pub enum LogLevel {
     Debug,
 }
 
-impl LogLevel {
-    pub fn from_str(level: &str) -> Result<Self, ParsingError> {
+impl FromStr for LogLevel {
+    type Err = ParsingError;
+
+    fn from_str(level: &str) -> Result<Self, Self::Err> {
         match level {
             "INFO" => Ok(LogLevel::Info),
             "ERROR" => Ok(LogLevel::Error),
@@ -80,10 +84,7 @@ impl TryFrom<String> for LogEntry {
 
         // Extract the log level, and convert to LogLevel enum
         let level = match captures.name("level") {
-            Some(l) => match LogLevel::from_str(l.as_str()) {
-                Ok(l) => l,
-                Err(err) => return Err(err),
-            },
+            Some(l) => LogLevel::from_str(l.as_str())?,
             None => return Err(ParsingError::ParseError("Failed to parse log level")),
         };
 

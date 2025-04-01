@@ -3,6 +3,10 @@ name = "bin"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "log_analysis"
+path = "src/main.rs"
+
 [dependencies]
 parsing = { path = "../lib/parsing" }
 tokio = { version = "1", features = ["full"] }
