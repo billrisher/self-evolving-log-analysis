@@ -25,16 +25,14 @@ pub enum ParsingError {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum LogLevel {
     Info,
-    Warning,
     Error,
-    Debug
+    Debug,
 }
 
 impl LogLevel {
     pub fn from_str(level: &str) -> Result<Self, ParsingError> {
         match level {
             "INFO" => Ok(LogLevel::Info),
-            "WARNING" => Ok(LogLevel::Warning),
             "ERROR" => Ok(LogLevel::Error),
             "DEBUG" => Ok(LogLevel::Debug),
             _ => Err(ParsingError::UnknownLogLevel),
@@ -46,7 +44,6 @@ impl std::fmt::Display for LogLevel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             LogLevel::Info => write!(f, "INFO"),
-            LogLevel::Warning => write!(f, "WARNING"),
             LogLevel::Error => write!(f, "ERROR"),
             LogLevel::Debug => write!(f, "DEBUG"),
         }
@@ -77,7 +74,7 @@ impl TryFrom<String> for LogEntry {
             Some(t) => match DateTime::parse_from_rfc3339(t.as_str()) {
                 Ok(t) => t.with_timezone(&Utc),
                 Err(err) => return Err(ParsingError::TimestampError(err)),
-            }
+            },
             None => return Err(ParsingError::ParseError("Failed to parse timestamp")),
         };
 
@@ -90,7 +87,10 @@ impl TryFrom<String> for LogEntry {
             None => return Err(ParsingError::ParseError("Failed to parse log level")),
         };
 
-        let message = captures.name("message").map(|m| m.as_str().to_string()).filter(|m| !m.is_empty());
+        let message = captures
+            .name("message")
+            .map(|m| m.as_str().to_string())
+            .filter(|m| !m.is_empty());
 
         // Create a new LogEntry struct
         Ok(LogEntry {
@@ -107,18 +107,22 @@ mod tests {
 
     #[test]
     fn parse_complete_logs() {
-        let debug_entry = "[2023-10-01T12:00:00Z] DEBUG - IP:192.168.123.45 Error 500 - This is a debug message";
+        let debug_entry =
+            "[2023-10-01T12:00:00Z] ERROR - IP:192.168.123.45 Error 500 - This is a debug message";
 
         let entry = LogEntry::try_from(debug_entry.to_string()).expect("Failed to parse log entry");
         assert_eq!(entry.timestamp.to_string(), "2023-10-01 12:00:00 UTC");
         assert_eq!(entry.level, LogLevel::Debug);
-        assert_eq!(entry.message, Some("Error 500 - This is a debug message".to_string()));
+        assert_eq!(
+            entry.message,
+            Some("Error 500 - This is a debug message".to_string())
+        );
         assert_eq!(entry.timestamp.to_string(), "2023-10-01 12:00:00 UTC");
     }
 
     #[test]
     fn parse_log_without_message() {
-        let log_entry = "[2024-01-28T15:30:45Z] DEBUG - IP:192.168.234.12";
+        let log_entry = "[2024-01-28T15:30:45Z] DEBUG - IP:192.168.234.12 ";
 
         let entry = LogEntry::try_from(log_entry.to_string()).expect("Failed to parse log entry");
         assert_eq!(entry.timestamp.to_string(), "2024-01-28 15:30:45 UTC");
@@ -128,7 +132,8 @@ mod tests {
 
     #[test]
     fn parse_malformed_log_returns_error() {
-        let log_entry = "[24=01-29T15:3:45Z] DEBG - IP:19:168.234.12 - This is a malformed log entry";
+        let log_entry =
+            "[24=01-29T15:3:45Z] DEBG - IP:19:168.234.12 - This is a malformed log entry";
 
         let result = LogEntry::try_from(log_entry.to_string());
         assert!(result.is_err());
